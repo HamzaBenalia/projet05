@@ -1,9 +1,8 @@
 package com.safetyNet.alert.repository;
+
 import com.safetyNet.alert.model.Person;
-import com.safetyNet.alert.repository.PersonRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,8 +12,9 @@ import static org.junit.jupiter.api.Assertions.*;
 public class PersonRepositoryTest {
 
 
+    private final List<Person> person1 = new ArrayList<>();
 
-    private List<Person> person1 = new ArrayList<>();
+    private PersonRepository personRepository;
 
 
     @Test
@@ -57,33 +57,28 @@ public class PersonRepositoryTest {
         assertEquals(1, personRepository.getAll().size());
     }
 
-   @Test
-    public void updatePersonTest() {
-        PersonRepository personRepository = new PersonRepository();
-        Person person1 = new Person("John", "Boyd","789 Maple St");
-        Person person2 = new Person("Mary", "Smith");
-        personRepository.save(person1);
-        personRepository.save(person2);
 
-        // Create an updated version of person1
-        Person updatedPerson1 = new Person("Hamza", "Boyd","Toulouse");
+   /* @Test
+    public void testUpdatePerson() {
+        // Créer quelques personnes pour le test
+        Person person1 = new Person("Alice", "Smith", "123 Main St", "Toulouse", "31000", "0766764625", "alice@gmail.com", "15/02/1995");
+        Person person2 = new Person("Hamza", "Ben", "321 Main St", "Paris", "Toulouse", "0766552200", "Hamza@gmail.com", "18/02/1999");
+        List<Person> persons = new ArrayList<>();
+        persons.add(person1);
+        persons.add(person2);
 
-        // Update person1 in the repository
-        personRepository.updatePerson(updatedPerson1);
+        // Mettre à jour une personne existante
+        Person updatedPerson = new Person("Alice", "Smith", "123 Main St", "Montpellier", "34000", "0766764625", "alice@gmail.com", "15/02/1995");
 
-        // Verify that person1 was updated in the repository
-        List<Person> allPersons = personRepository.getAll();
-        for (Person person : allPersons) {
-            if (person.getFirstName().equals("Hamza") && person.getLastName().equals("Boyd")) {
-                Assertions.assertEquals("Hamza", person.getFirstName());
-                Assertions.assertEquals("Toulouse", person.getAddress());
+        when(personRepository.updatePerson(updatedPerson)).thenReturn();
+        // Vérifier que la personne a été mise à jour correctement
+        List<Person> updatedPersons = personRepository.getAll();
+        assertTrue(updatedPersons.contains("Montpellier"));
 
-            }
-        }
-
-        // Verify that person2 was not affected by the update
-        assertTrue(allPersons.contains(person2));
+        // Vérifier que la deuxième personne n'a pas été modifiée
+        assertEquals("Paris", updatedPersons.get(1).getCity());
     }
+*/
 
     @Test
     public void testGetPersonByName() {

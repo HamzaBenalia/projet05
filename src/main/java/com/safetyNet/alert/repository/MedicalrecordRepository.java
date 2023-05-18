@@ -9,7 +9,7 @@ import java.util.List;
 @Repository
 public class MedicalrecordRepository {
 
-    private List<Medicalrecord> medicalrecords = new ArrayList<>();
+    private final List<Medicalrecord> medicalrecords = new ArrayList<>();
 
     public void save(Medicalrecord medicalrecord) {
         medicalrecords.add(medicalrecord);
@@ -40,12 +40,11 @@ public class MedicalrecordRepository {
     }
 
 
-    public List<Medicalrecord> deleteMedicalrecordByFirstNameLastNameAndPosology(String firstName, String lastName, String namePosology) {
+    public void deleteMedicalrecordByFirstNameLastNameAndPosology(String firstName, String lastName, String namePosology) {
         Medicalrecord medicalrecord = findByFirstNameLastNameAndPosology(firstName, lastName, namePosology);
         if (medicalrecord != null) {
             medicalrecords.remove(medicalrecord);
         }
-        return medicalrecords;
     }
 
     public void updateMedicalrecords(Medicalrecord updateMedicalrecord, String oldNamePosology) {

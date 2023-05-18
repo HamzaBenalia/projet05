@@ -9,7 +9,7 @@ import java.util.List;
 @Repository
 public class AllergyRepository {
 
-    private List<Allergy> allergies = new ArrayList<>();
+    private final List<Allergy> allergies = new ArrayList<>();
 
     public void save(Allergy allergy) {
         allergies.add(allergy);

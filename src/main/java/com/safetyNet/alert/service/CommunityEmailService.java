@@ -1,6 +1,5 @@
 package com.safetyNet.alert.service;
 
-
 import com.safetyNet.alert.dto.CommunityEmail;
 import com.safetyNet.alert.repository.CommunityEmailRepository;
 import org.springframework.beans.factory.annotation.Autowired;

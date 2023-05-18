@@ -14,27 +14,18 @@ public class PersonRepository {
     @Autowired
     MedicalrecordRepository medicalrecordRepository;
     AllergyRepository allergyRepository;
-    private List<Person> persons = new ArrayList<>();
-    private List<Firestation> firestations = new ArrayList<>();
-    private List<Medicalrecord> medicalrecords = new ArrayList<>();
+    private final List<Person> persons = new ArrayList<>();
+    private final List<Firestation> firestations = new ArrayList<>();
+    private final List<Medicalrecord> medicalrecords = new ArrayList<>();
 
     public void save(Person person) {
         persons.add(person);
     }
 
-    public void savePersonAndMedical(Person person, Medicalrecord medical) {
-        persons.add(person);
-        medicalrecords.add(medical);
-    }
-
-
     public List<Person> getAll() {
         return persons;
     }
 
-    public List<Person> getAllInfo() {
-        return persons;
-    }
 
     public void deletePerson(Person person) {
         persons.remove(person);

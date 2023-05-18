@@ -37,18 +37,6 @@ public class FirestationService {
         return null;
     }
 
-
-    /*public List<Firestation> deleteFirestationByAddress(String address) {
-        List<Firestation> firestations = firestationRepository.getAll();
-        for (Firestation firestation : firestations) {
-            if (firestation.getAddress().equals(address)) {
-                firestations.remove(firestation);
-                return firestations;
-            }
-        }return null;
-    }*/
-
-
     public List<Firestation> deleteFirestationByAddress(String address) {
         List<Firestation> firestations = firestationRepository.getAll();
         Iterator<Firestation> iterator = firestations.iterator();

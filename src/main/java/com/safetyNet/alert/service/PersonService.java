@@ -52,19 +52,6 @@ public class PersonService {
         return personRepository.getAll();
     }
 
-    public Map<Person, Medicalrecord> getAllInfo(String firstName, String lastName) {
-        Map<Person, Medicalrecord> peopleInfo = new HashMap<>();
-        for (Person person : personRepository.getAll()) {
-            for (Medicalrecord medicalrecord : medicalrecordRepository.getAll()) {
-                if (person.getFirstName().equals(medicalrecord.getFirstName()) && person.getLastName().equals(medicalrecord.getLastName())) {
-                    peopleInfo.put(person, medicalrecord);
-                }
-            }
-        }
-        return peopleInfo;
-    }
-
-
     public Person getPersonByFirstNameAndLastName(String firstName, String lastName) {
         List<Person> persons = personRepository.getAll();
         for (Person person : persons) {
@@ -73,10 +60,6 @@ public class PersonService {
             }
         }
         return null;
-    }
-
-    public void deletePerson(Person person) {
-        personRepository.deletePerson(person);
     }
 
     public List<Person> deleteByFirstNameAndLastName(String firstName, String lastName) {
@@ -114,10 +97,6 @@ public class PersonService {
             personInfoDtos.add(personInfoDto);
         }
         return personInfoDtos;
-    }
-
-    public List<Person> getPersonByAddress(String address) {
-        return personRepository.getPersonByAddress(address);
     }
 
     public List<Person> getPersonByphone(String phone) {
@@ -177,9 +156,9 @@ public class PersonService {
     public List<FireDto> getResidentsByAddress(String address) {
         CalculateAge calculateAge = new CalculateAge();
         List<FireDto> fireDataDtos = new ArrayList<>();
-        for (Firestation firestation1 : firestationRepository.getAll()) {
+        for (Firestation firestation : firestationRepository.getAll()) {
             for (Person person : personRepository.getPersonByAddress(address)) {
-                if (firestation1.getAddress().equals(address)) {
+                if (firestation.getAddress().equals(address)) {
                     List<Allergy> allergieList = allergyRepository.findByFirstNameAndLastName(person.getFirstName(), person.getLastName());
                     List<Medicalrecord> medicalrecordList = medicalrecordRepository.getMedicalrecorByFirstNameAndLastName(person.getFirstName(), person.getLastName());
                     FireDataDto fireDataDto = new FireDataDto();
@@ -188,9 +167,9 @@ public class PersonService {
                     fireDataDto.setAge(String.valueOf(age));
                     fireDataDto.setPhone(person.getPhone());
                     fireDataDto.setFirstName(person.getFirstName());
-                    fireDataDto.setStationNumber(firestation1.getStation());
-                    FireDto fireDto1 = new FireDto(fireDataDto, allergieList, medicalrecordList);
-                    fireDataDtos.add(fireDto1);
+                    fireDataDto.setStationNumber(firestation.getStation());
+                    FireDto fireDto = new FireDto(fireDataDto, allergieList, medicalrecordList);
+                    fireDataDtos.add(fireDto);
                 }
             }
 

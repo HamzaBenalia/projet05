@@ -1,16 +1,12 @@
 package com.safetyNet.alert.repository;
 
 import com.safetyNet.alert.model.Firestation;
-import com.safetyNet.alert.repository.FirestationRepository;
-import com.safetyNet.alert.service.FirestationService;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
 
 public class FirestationRepositoryTest {
 
@@ -114,7 +110,22 @@ public class FirestationRepositoryTest {
         firestationRepository.save(firestation3);
 
         List<Firestation> result = firestationRepository.getFirestationByStation("1");
-        List<Firestation> expected = Arrays.asList(firestation1);
+        List<Firestation> expected = List.of(firestation1);
+        assertEquals(expected, result);
+    }
+
+    @Test
+    public void testgetStationByAddress() {
+        FirestationRepository firestationRepository = new FirestationRepository();
+        Firestation firestation1 = new Firestation("123 Main St", "1");
+        Firestation firestation2 = new Firestation("456 Oak Ave", "1");
+        Firestation firestation3 = new Firestation("789 Elm Rd", "2");
+        firestationRepository.save(firestation1);
+        firestationRepository.save(firestation2);
+        firestationRepository.save(firestation3);
+
+        List<String> result = firestationRepository.getStationByAddress("123 Main St");
+        List<String> expected = List.of("1");
         assertEquals(expected, result);
     }
 

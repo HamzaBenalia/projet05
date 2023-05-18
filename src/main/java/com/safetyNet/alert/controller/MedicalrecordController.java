@@ -32,9 +32,9 @@ public class MedicalrecordController {
     }
 
     @DeleteMapping("/{firstName}/{lastName}")
-    public List<Medicalrecord> deleteMedicalrecord(@RequestBody Medicalrecord medicalrecord, @PathVariable("firstName") String firstName, @PathVariable("lastName") String lastName) {
+    public void deleteMedicalrecord(@RequestBody Medicalrecord medicalrecord, @PathVariable("firstName") String firstName, @PathVariable("lastName") String lastName) {
         log.info("Supprimer un dossier medicale par prenom = {} && par nom ={}", firstName, lastName);
-        return medicalrecordService.deleteMeicalrecordByFirstNameLastNameAndNamePosology(firstName, lastName, medicalrecord.getNamePosology());
+        medicalrecordService.deleteMeicalrecordByFirstNameLastNameAndNamePosology(firstName, lastName, medicalrecord.getNamePosology());
     }
 
     @PutMapping("/{oldNamePosology}")

@@ -29,8 +29,8 @@ public class MedicalrecordService {
     }
 
 
-    public List<Medicalrecord> deleteMeicalrecordByFirstNameLastNameAndNamePosology(String fistName, String lastName, String namePosology) {
-        return medicalrecordRepository.deleteMedicalrecordByFirstNameLastNameAndPosology(fistName, lastName, namePosology);
+    public void deleteMeicalrecordByFirstNameLastNameAndNamePosology(String fistName, String lastName, String namePosology) {
+        medicalrecordRepository.deleteMedicalrecordByFirstNameLastNameAndPosology(fistName, lastName, namePosology);
     }
 
     public void updateMedicalrecords(Medicalrecord updateMedicalrecord, String oldNamePosology) {

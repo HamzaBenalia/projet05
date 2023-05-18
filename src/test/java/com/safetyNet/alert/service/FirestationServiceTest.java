@@ -2,62 +2,63 @@ package com.safetyNet.alert.service;
 
 import com.safetyNet.alert.model.Firestation;
 import com.safetyNet.alert.repository.FirestationRepository;
-import com.safetyNet.alert.service.FirestationService;
+import com.safetyNet.alert.repository.PersonRepository;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.*;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 public class FirestationServiceTest {
+    @Captor
+    ArgumentCaptor<Firestation> firestationArgumentCaptor;
+    @InjectMocks
+    FirestationService firestationService;
+    @Mock
+    private FirestationRepository firestationRepository;
+    @Mock
+    private PersonRepository personRepository;
 
     @Test
     public void testAddFirestation() {
-        // Create a new firestation object to add
-        Firestation firestation = new Firestation();
-        firestation.setAddress("123 Main St");
-        firestation.setStation("1");
+        Firestation firestation = new Firestation("Toulouse", "1");
+        when(firestationRepository.getAll()).thenReturn(new ArrayList<>());
 
-        // Create a mock FirestationRepository
-        FirestationRepository firestationRepository = mock(FirestationRepository.class);
-        FirestationService firestationService = mock(FirestationService.class);
-
-        // When getFirestationByAddress is called with the firestation's address, return null
-        when(firestationRepository.getStationByAddress(firestation.getAddress())).thenReturn(null);
-
-        // Call the add method
         firestationService.add(firestation);
 
-        verify(firestationService, times(1)).add(firestation);
+        Mockito.verify(firestationRepository, times(1)).save(firestationArgumentCaptor.capture());
+
+        assertThat(firestationArgumentCaptor.getValue())
+                .extracting("address", "station")
+                .containsExactly(firestation.getAddress(), firestation.getStation());
+
     }
 
 
     @Test
     public void testGetAll() {
         // Create a list of fire stations to use as test data
-        Firestation firestation1 = new Firestation("123 Main St", "1");
-        Firestation firestation2 = new Firestation("456 Elm St", "2");
-        List<Firestation> firestationList = new ArrayList<>();
-        firestationList.add(firestation1);
-        firestationList.add(firestation2);
+        Firestation firestation1 = new Firestation("Toulouse", "1");
+        Firestation firestation2 = new Firestation("Montpellier", "2");
+        List<Firestation> allFirestations = Arrays.asList(firestation1, firestation2);
 
-        // Create a mock FirestationRepository that returns the test data
-        FirestationRepository firestationRepository = mock(FirestationRepository.class);
-        FirestationService firestationService = mock(FirestationService.class);
-        when(firestationService.getAll()).thenReturn(firestationList);
+        when(firestationRepository.getAll()).thenReturn(allFirestations);
 
         List<Firestation> result = firestationService.getAll();
-
-        // Verify that the correct data was returned
+        Mockito.verify(firestationRepository, times(1)).getAll();
         assertEquals(2, result.size());
-        assertTrue(result.contains(firestation1));
-        assertTrue(result.contains(firestation2));
-
-        // Verify that the firestationRepository's getAll method was called
-        verify(firestationService, Mockito.times(1)).getAll();
+        Assertions.assertTrue(result.contains(firestation1));
+        Assertions.assertTrue(result.contains(firestation2));
     }
 
 
@@ -66,48 +67,46 @@ public class FirestationServiceTest {
         // Create test data
         Firestation firestation1 = new Firestation("123 Main St", "1");
         Firestation firestation2 = new Firestation("456 Elm St", "2");
-        FirestationService firestationService = mock(FirestationService.class);
-        firestationService.add(firestation1);
-        firestationService.add(firestation2);
-        when(firestationService.getFirestationByAddress("123 Main St")).thenReturn(firestation1);
-        when(firestationService.getFirestationByAddress("456 Elm St")).thenReturn(firestation2);
+
+        List<Firestation> firestationList = new ArrayList<>();
+
+        firestationList.add(firestation1);
+        firestationList.add(firestation2);
+
+        firestationRepository.save(firestation1);
+        firestationRepository.save(firestation2);
+
+
+        when(firestationService.getAll()).thenReturn(firestationList);
 
         Firestation result1 = firestationService.getFirestationByAddress("123 Main St");
-        Firestation result2 = firestationService.getFirestationByAddress(("13 route LosAngeles"));
+        Firestation result2 = firestationService.getFirestationByAddress("13 route LosAngeles");
+
         assertNotNull(result1);
         assertNull(result2);
         assertEquals("1", result1.getStation());
     }
+
 
     @Test
     public void testDeleteFirestationByAddress() {
         // Create a list of firestations to use as test data
         Firestation firestation1 = new Firestation("1st Avenue", "1");
         Firestation firestation2 = new Firestation("2nd Avenue", "2");
-        FirestationRepository firestationRepository = mock(FirestationRepository.class);
-        FirestationService firestationService = mock(FirestationService.class);
-
 
         // Add the test data to the repository
         firestationRepository.save(firestation1);
         firestationRepository.save(firestation2);
 
-        when(firestationService.getFirestationByAddress("1st Avenue")).thenReturn(firestation1);
-        when(firestationService.getFirestationByAddress("2nd Avenue")).thenReturn(firestation2);
-
-        // Call the deleteFirestationByAddress method
         List<Firestation> firestationList = new ArrayList<>();
         firestationList.add(firestation1);
         firestationList.add(firestation2);
-        List<Firestation> result = new ArrayList<>();
-        firestationRepository.deleteFirestation(firestation1);
+        when(firestationRepository.getAll()).thenReturn(firestationList);
 
-        result = firestationService.getAll();
+        firestationService.deleteFirestationByAddress("1st Avenue");
 
-        assertFalse(result.contains(new Firestation("1sd Avenue", "1")));
+
+        assertEquals(1, firestationList.size());
     }
-
-
-
 
 }

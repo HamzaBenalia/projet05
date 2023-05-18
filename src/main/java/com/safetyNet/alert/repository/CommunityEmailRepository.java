@@ -9,7 +9,7 @@ import java.util.List;
 @Repository
 public class CommunityEmailRepository {
 
-    private List<CommunityEmail> communityEmails = new ArrayList<>();
+    private final List<CommunityEmail> communityEmails = new ArrayList<>();
 
 
     public void saveEmailCommunity(CommunityEmail communityEmail) {

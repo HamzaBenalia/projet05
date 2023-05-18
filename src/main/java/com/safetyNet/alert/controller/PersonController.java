@@ -1,12 +1,10 @@
 package com.safetyNet.alert.controller;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.safetyNet.alert.dto.childAlert.ChildDto;
 import com.safetyNet.alert.dto.fire.FireDto;
 import com.safetyNet.alert.dto.flood.FloodDto;
 import com.safetyNet.alert.dto.personInfo.PersonInfoDto;
 import com.safetyNet.alert.dto.phoneAlert.PhoneAlertDto;
-import com.safetyNet.alert.model.Medicalrecord;
 import com.safetyNet.alert.model.Person;
 import com.safetyNet.alert.service.PersonService;
 import lombok.extern.slf4j.Slf4j;
@@ -38,17 +36,10 @@ public class PersonController {
         return personService.getAll();
     }
 
-
     @DeleteMapping(PATH + "/{firstname}/{lastname}")
     public void deletePerson(@PathVariable("firstname") String firstName, @PathVariable("lastname") String lastName) {
         log.info("Supprimer une personne par nom ={} et prénom = {}", firstName, lastName);
         personService.deleteByFirstNameAndLastName(firstName, lastName);
-    }
-
-    @GetMapping(PATH + "/{firstname}/{lastname}")
-    public Map<Person, Medicalrecord> getAllInfo(@PathVariable("firstname") String firstName, @PathVariable("lastname") String lastName) {
-        log.info("Je sais pas encore");
-        return personService.getAllInfo(firstName, lastName);
     }
 
     @PutMapping(PATH)
@@ -98,16 +89,6 @@ public class PersonController {
         log.info("Chercher un liste d'enfants agé de 18 ans ou moins par l'address = {}", address);
         return personService.getChildrenByAddress(address);
 
-    }
-
-    @GetMapping("{phone}")
-    public List<Person> getPersonByPhone(@PathVariable("phone") String phone) {
-        return personService.getPersonByphone(phone);
-    }
-
-    @PostMapping(PATH + "/addPersonAndMedical")
-    public void addPersonAndMedical(@JsonProperty("person") Person person) {
-        personService.add(person);
     }
 
 }

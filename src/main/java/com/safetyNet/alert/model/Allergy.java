@@ -12,6 +12,4 @@ public class Allergy {
     private String lastName;
     private String nameAllergy;
 
-    public Allergy(String nameAllergy) {
-    }
 }

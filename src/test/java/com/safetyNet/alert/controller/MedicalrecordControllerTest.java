@@ -1,21 +1,17 @@
 package com.safetyNet.alert.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.safetyNet.alert.controller.MedicalrecordController;
 import com.safetyNet.alert.model.Medicalrecord;
 import com.safetyNet.alert.service.MedicalrecordService;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,24 +20,20 @@ import java.util.List;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
-
+@SpringBootTest()
+@AutoConfigureMockMvc
 public class MedicalrecordControllerTest {
-/*
-    @Autowired
-    private MockMvc mockMvc;
-
 
     @MockBean
     MedicalrecordService medicalrecordService;
-
     @Autowired
-     ObjectMapper objectMapper;
-
+    ObjectMapper objectMapper;
+    @Autowired
+    private MockMvc mockMvc;
 
     @Test
-    public void medicalRecordController_createMedicalRecord_returnCreated() throws Exception{
+    public void medicalRecordController_createMedicalRecord_returnCreated() throws Exception {
 
         Medicalrecord medicalrecord = new Medicalrecord();
         medicalrecord.setFirstName("hamza");
@@ -51,16 +43,16 @@ public class MedicalrecordControllerTest {
 
         String json = objectMapper.writeValueAsString(medicalrecord);
 
-        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.post("/medicalrecord").contentType(MediaType.APPLICATION_JSON).content(json)).andExpect(MockMvcResultMatchers.status().isOk()).andReturn();
+        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.post("/medicalrecord").contentType(MediaType.APPLICATION_JSON).content(json)).andExpect(status().isOk()).andReturn();
         verify(medicalrecordService, times(1)).add(any(Medicalrecord.class));
 
     }
 
     @Test
-    public void medicalRecordController_getAllTest_returnedAllMedicalrecord() throws Exception{
+    public void medicalRecordController_getAllTest_returnedAllMedicalrecord() throws Exception {
         List<Medicalrecord> medicalrecordList = Arrays.asList(
                 new Medicalrecord("Hamza", "ben", "Aspirine : 300mg", "14/01/1995"),
-                new Medicalrecord("Sara", "ben", "Aznol : 200mg","18/11/1997")
+                new Medicalrecord("Sara", "ben", "Aznol : 200mg", "18/11/1997")
         );
 
         when(medicalrecordService.getAll()).thenReturn(medicalrecordList);
@@ -70,9 +62,9 @@ public class MedicalrecordControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$[0].firstName").value("Hamza"))
-                .andExpect(jsonPath("$[0].lastName").value("ben" ))
-                .andExpect(jsonPath("$[0].namePosology").value("Aspirine : 300mg" ))
-                .andExpect(jsonPath("$[0].birthDate").value("14/01/1995" ))
+                .andExpect(jsonPath("$[0].lastName").value("ben"))
+                .andExpect(jsonPath("$[0].namePosology").value("Aspirine : 300mg"))
+                .andExpect(jsonPath("$[0].birthDate").value("14/01/1995"))
                 .andExpect(jsonPath("$[1].firstName").value("Sara"))
                 .andExpect(jsonPath("$[1].lastName").value("ben"))
                 .andExpect(jsonPath("$[1].namePosology").value("Aznol : 200mg"))
@@ -94,10 +86,10 @@ public class MedicalrecordControllerTest {
         List<Medicalrecord> medicalrecordList = new ArrayList<>();
         medicalrecordList.add(medicalrecord);
 
-        when(medicalrecordService.deleteMeicalrecordByFirstNameLastNameAndNamePosology("John","Doe","Doliprane : 200mg")).thenReturn(medicalrecordList);
+        doNothing().when(medicalrecordService).deleteMeicalrecordByFirstNameLastNameAndNamePosology(medicalrecord.getFirstName(), medicalrecord.getLastName(), medicalrecord.getNamePosology());
 
         // Perform DELETE request
-        mockMvc.perform(MockMvcRequestBuilders.delete("/medicalrecord")
+        mockMvc.perform(MockMvcRequestBuilders.delete("/medicalrecord/"+ medicalrecord.getFirstName() +"/" + medicalrecord.getLastName())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(medicalrecord)))
                 .andExpect(status().isOk());
@@ -167,7 +159,6 @@ public class MedicalrecordControllerTest {
         verify(medicalrecordService, times(1)).findByFirstNameLastNameAndPosology(testFirstName, testLastName, testNamePosology);
     }
 
-*/
 
 }
 

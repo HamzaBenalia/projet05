@@ -1,78 +1,66 @@
 package com.safetyNet.alert.controller;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.safetyNet.alert.controller.FirestationController;
-import com.safetyNet.alert.dto.stationDto.PersonStationDto;
-import com.safetyNet.alert.dto.stationDto.StationInfoDto;
 import com.safetyNet.alert.model.Firestation;
 import com.safetyNet.alert.service.FirestationService;
 import com.safetyNet.alert.service.PersonService;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import static com.safetyNet.alert.controller.FirestationController.PATH;
-import static net.bytebuddy.matcher.ElementMatchers.is;
-import static org.hamcrest.Matchers.hasSize;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
-
-
+@SpringBootTest()
+@AutoConfigureMockMvc
 public class FirestationControllerTest {
-
-   /* @Autowired
-    private MockMvc mockMvc;
 
     @MockBean
     FirestationService firestationService;
-
     @MockBean
     PersonService personService;
-
     @Autowired
     ObjectMapper objectMapper;
+    @Autowired
+    private MockMvc mockMvc;
 
     @Test
-    public void firestationController_createFirestation_returnCreated() throws Exception{
+    public void firestationController_createFirestation_returnCreated() throws Exception {
         Firestation firestation = new Firestation();
         firestation.setAddress("20 rue Toulouse");
         firestation.setStation("1");
 
         String json = objectMapper.writeValueAsString(firestation);
 
-        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.post("/firestation")
+        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.post(PATH)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
-                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(status().isOk())
                 .andReturn();
 
-        verify(firestationService, Mockito.times(1)).add(any(Firestation.class));
+        Mockito.verify(firestationService, times(1)).add(ArgumentMatchers.any(Firestation.class));
+
     }
 
     @Test
-    public void firestationController_getAllFirestationsTest_returnAllFirestations() throws Exception{
+    public void firestationController_getAllFirestationsTest_returnAllFirestations() throws Exception {
 
         List<Firestation> firestationList = Arrays.asList(
-                new Firestation("12 rue Toulouse","1"),
+                new Firestation("12 rue Toulouse", "1"),
                 new Firestation("20 rue Toulouse", "2")
         );
 
@@ -83,12 +71,12 @@ public class FirestationControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$[0].address").value("12 rue Toulouse"))
-                .andExpect(jsonPath("$[0].station").value("1" ))
+                .andExpect(jsonPath("$[0].station").value("1"))
                 .andExpect(jsonPath("$[1].address").value("20 rue Toulouse"))
                 .andExpect(jsonPath("$[1].station").value("2"))
                 .andReturn();
 
-        verify(firestationService, Mockito.times(1)).getAll();
+        Mockito.verify(firestationService, times(1)).getAll();
 
 
     }
@@ -98,7 +86,7 @@ public class FirestationControllerTest {
         // Set up test data
         String testAddress = "123 Main St";
 
-        List<Firestation>firestationList = new ArrayList<>();
+        List<Firestation> firestationList = new ArrayList<>();
 
         Firestation firestation = new Firestation();
         firestation.setStation("1");
@@ -114,8 +102,7 @@ public class FirestationControllerTest {
                 .andExpect(status().isOk());
 
         // Verify that the delete method was called in the firestationService
-        verify(firestationService, times(1)).deleteFirestationByAddress(testAddress);
-
+        Mockito.verify(firestationService, times(1)).deleteFirestationByAddress(testAddress);
 
 
     }
@@ -142,11 +129,11 @@ public class FirestationControllerTest {
                 .andExpect(content().string("Firestation updated successfully"));
 
         // Verify that the update method was called in the firestationService
-        verify(firestationService, times(1)).updateFirestation(updatedFirestation);
+        Mockito.verify(firestationService, times(1)).updateFirestation(updatedFirestation);
     }
 
 
-    @Test
+    /*@Test
     void testGetPersonByFirestationNumber() throws Exception {
 
         String testStationNumber = ("1");
@@ -173,18 +160,13 @@ public class FirestationControllerTest {
         mockMvc.perform(MockMvcRequestBuilders.get(PATH).param("stationNumber", testStationNumber))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-
-                .andExpect((ResultMatcher) jsonPath("$.adultCount", is(stationInfoDto.getAdult())))
-                .andExpect((ResultMatcher) jsonPath("$.childCount", is(stationInfoDto.getMinor())))
+                //.andExpect((ResultMatcher) jsonPath("$.adultCount", is(stationInfoDto.getAdult())))
+                //.andExpect((ResultMatcher) jsonPath("$.childCount", is(stationInfoDto.getMinor())))
                 .andExpect(jsonPath("$.persons", hasSize(stationInfoDto.getPersonStationDtos().size())));
 
         // Verify that the getPersonByFirestation method was called in the personService
-        verify(personService, times(1)).getPersonByFirestation(testStationNumber);
+        Mockito.verify(personService, times(1)).getPersonByFirestation(testStationNumber);
     }
-
-
-
 */
-
 }
 

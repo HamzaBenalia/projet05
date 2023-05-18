@@ -2,67 +2,74 @@ package com.safetyNet.alert.service;
 
 import com.safetyNet.alert.model.Allergy;
 import com.safetyNet.alert.repository.AllergyRepository;
-import com.safetyNet.alert.service.AllergyService;
+import com.safetyNet.alert.repository.PersonRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.*;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 public class AllergyServiceTest {
+
+    @InjectMocks
+    AllergyService allergyService;
+
+    @Mock
+    AllergyRepository allergyRepository;
+
+    @Captor
+    private ArgumentCaptor<Allergy> allergyArgumentCaptor;
+
+    @Mock
+    private PersonRepository personRepository;
+
+
     @Test
     public void testAddAllergy() {
-        // Créer une instance de la classe à tester et injecter le mock comme dépendance
-        AllergyRepository allergyService = mock(AllergyRepository.class);
+        Allergy allergy = new Allergy("John", "Boyd", "Pollen");
+        //when(allergyRepository.getAll()).thenReturn(new ArrayList<>());
 
+        allergyService.add(allergy);
 
-        // Créer une nouvelle allergie à ajouter
-        Allergy newAllergy = new Allergy("John", "Doe", "Pollen");
+        Mockito.verify(allergyRepository, times(1)).save(allergyArgumentCaptor.capture());
 
-        // Créer une allergie existante
-        Allergy existingAllergy = new Allergy("Jane", "Doe", "Pollen");
+        assertThat(allergyArgumentCaptor.getValue())
+                .extracting("firstName", "lastName", "nameAllergy")
+                .containsExactly(allergy.getFirstName(), allergy.getLastName(), allergy.getNameAllergy());
 
-        // Simuler le comportement du mock pour la méthode findByFirstNameLastNameAndAllergy()
-        when(allergyService.findByFirstNameLastNameAndAllergy("John", "Doe", "Pollen")).thenReturn(newAllergy);
-        when(allergyService.findByFirstNameLastNameAndAllergy("Jane", "Doe", "Pollen")).thenReturn(null);
-
-        // Ajouter une nouvelle allergie
-        allergyService.save(newAllergy);
-
-        // Vérifier que l'allergie a été ajoutée en appelant la méthode save() du mock
-
-
-        // Ajouter une allergie existante
-        allergyService.save(existingAllergy);
-
-        // Vérifier que l'allergie n'a pas été ajoutée en appelant la méthode save() du mock
-        verify(allergyService, times(1)).save(existingAllergy);
 
     }
 
     @Test
     public void testGetAllAllergies() {
-        // Créer une instance de la classe à tester
+        // Create an allergy for testing
+        Allergy allergy = new Allergy("John", "Doe", "Pollen");
 
-        // Créer une liste d'allergies
-        List<Allergy> allergies = new ArrayList<>();
-        allergies.add(new Allergy("John", "Doe", "Pollen"));
-        allergies.add(new Allergy("Jane", "Doe", "Peanuts"));
+        // Add the allergy to the service
+        allergyService.add(allergy);
 
+        // Inject the list of allergies into the class to be tested
+        when(allergyRepository.getAll()).thenReturn(Collections.singletonList(allergy));
 
-        AllergyService allergyService1 = mock(AllergyService.class);
-        // Injecter la liste d'allergies dans la classe à tester
-        when(allergyService1.getAll()).thenReturn(allergies);
-
-        // Vérifier que la méthode getAll() retourne bien la liste d'allergies
-
-        Assertions.assertEquals(allergies.get(0).getFirstName(), "John");
-        Assertions.assertEquals(allergies.get(1).getLastName(), "Doe");
+        // Verify that the method getAll() returns the list of allergies
+        List<Allergy> allergies = allergyService.getAll();
+        Assertions.assertEquals(1, allergies.size());
+        Assertions.assertEquals("John", allergies.get(0).getFirstName());
+        Assertions.assertEquals("Doe", allergies.get(0).getLastName());
+        Assertions.assertEquals("Pollen", allergies.get(0).getNameAllergy());
     }
 
-    /*@Test
+
+    @Test
     public void testDeleteAllergyByFirstNameLastNameAndNameAllergy() {
 
 
@@ -71,23 +78,43 @@ public class AllergyServiceTest {
         allergies.add(new Allergy("John", "Doe", "Pollen"));
         allergies.add(new Allergy("Jane", "Doe", "Peanuts"));
 
-        // Injecter la liste d'allergies dans la classe à tester
-        AllergyService allergyService = mock(AllergyService.class);
-        AllergyRepository allergyRepository = mock(AllergyRepository.class);
 
-        when(allergyService.getAll()).thenReturn(allergies);
-        when(allergyRepository.deleteAllergyByFirstNameLastNameAndAllergy("John", "Doe", "Pollen")).thenReturn(allergies);
+        //when(allergyRepository.getAll()).thenReturn(allergies);
 
         // Supprimer une allergie
-         allergyRepository.deleteAllergyByFirstNameLastNameAndAllergy("John", "Doe", "Pollen");
+        allergyService.deleteMeicalrecordByFirstNameLastNameAndNamePosology("John", "Doe", "Pollen");
 
         // Vérifier que l'allergie a bien été supprimée
+
+        Assertions.assertFalse(allergies.contains("John"));
+    }
+
+
+    /*@Test
+    public void testUpdateAllergy() {
+        // Create a new allergy
+        Allergy allergy = new Allergy("John", "Doe", "Pollen");
+        allergyRepository.save(allergy);
+
+        // Create an updated allergy
+        Allergy updatedAllergy = new Allergy("John", "Doe", "Grass");
+
+        // Update the allergy
+        allergyService.updateAllergy(updatedAllergy, "Pollen");
+
+        // Get the updated allergy
         List<Allergy> result = allergyService.getAll();
 
-        Assertions.assertEquals("Jane", result.get(0).getFirstName());
-        Assertions.assertEquals("Doe", result.get(0).getLastName());
-        Assertions.assertEquals("Peanuts", result.get(0).getNameAllergy());
+        // Check that the allergy has been updated
+        assertEquals(1, result.size());
+        assertEquals(updatedAllergy.getFirstName(), result.get(0).getFirstName());
+        assertEquals(updatedAllergy.getLastName(), result.get(0).getLastName());
+        assertEquals(updatedAllergy.getNameAllergy(), result.get(0).getNameAllergy());
     }
 */
-
 }
+
+
+
+
+

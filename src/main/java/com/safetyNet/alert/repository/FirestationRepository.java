@@ -1,18 +1,14 @@
 package com.safetyNet.alert.repository;
 
 import com.safetyNet.alert.model.Firestation;
-import org.junit.Test;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-
-import static org.junit.Assert.assertEquals;
 
 @Repository
 public class FirestationRepository {
-    private List<Firestation> firestations = new ArrayList<>();
+    private final List<Firestation> firestations = new ArrayList<>();
 
 
     public void save(Firestation firestation) {
@@ -65,21 +61,5 @@ public class FirestationRepository {
         }
         return firestationList;
     }
-
-    @Test
-    public void testGetStationByAddress() {
-        FirestationRepository firestationRepository = new FirestationRepository();
-        Firestation firestation1 = new Firestation("123 Main St", "1");
-        Firestation firestation2 = new Firestation("456 Oak Ave", "2");
-        Firestation firestation3 = new Firestation("789 Elm Rd", "1");
-        firestationRepository.save(firestation1);
-        firestationRepository.save(firestation2);
-        firestationRepository.save(firestation3);
-
-        List<String> result = firestationRepository.getStationByAddress("123 Main St");
-        List<String> expected = Arrays.asList("1");
-        assertEquals(expected, result);
-    }
-
 
 }

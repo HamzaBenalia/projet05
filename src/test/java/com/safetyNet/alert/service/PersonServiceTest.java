@@ -1,11 +1,11 @@
 package com.safetyNet.alert.service;
 
-import com.safetyNet.alert.dto.fire.FireDataDto;
+import com.safetyNet.alert.dto.childAlert.ChildDto;
 import com.safetyNet.alert.dto.fire.FireDto;
 import com.safetyNet.alert.dto.flood.FloodDto;
 import com.safetyNet.alert.dto.personInfo.PersonInfoDto;
-import com.safetyNet.alert.dto.phoneAlert.PhoneAlertDataDto;
 import com.safetyNet.alert.dto.phoneAlert.PhoneAlertDto;
+import com.safetyNet.alert.dto.stationDto.StationInfoDto;
 import com.safetyNet.alert.model.Allergy;
 import com.safetyNet.alert.model.Firestation;
 import com.safetyNet.alert.model.Medicalrecord;
@@ -14,10 +14,6 @@ import com.safetyNet.alert.repository.AllergyRepository;
 import com.safetyNet.alert.repository.FirestationRepository;
 import com.safetyNet.alert.repository.MedicalrecordRepository;
 import com.safetyNet.alert.repository.PersonRepository;
-import com.safetyNet.alert.service.AllergyService;
-import com.safetyNet.alert.service.FirestationService;
-import com.safetyNet.alert.service.MedicalrecordService;
-import com.safetyNet.alert.service.PersonService;
 import org.hamcrest.MatcherAssert;
 import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
@@ -31,9 +27,10 @@ import java.util.*;
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.hasItem;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.Mockito.*;
+
 @ExtendWith(MockitoExtension.class)
 public class PersonServiceTest {
     @InjectMocks
@@ -47,7 +44,8 @@ public class PersonServiceTest {
     @Mock
     private MedicalrecordRepository medicalrecordRepository;
 
-
+    @Mock
+    private FirestationRepository firestationRepository;
 
 
     @Test
@@ -60,7 +58,7 @@ public class PersonServiceTest {
         Mockito.verify(personRepository, times(1)).save(personArgumentCaptor.capture());
 
         assertThat(personArgumentCaptor.getValue())
-                .extracting("firstName", "lastName", "address", "city", "zip","phone","email","birthdate")
+                .extracting("firstName", "lastName", "address", "city", "zip", "phone", "email", "birthdate")
                 .containsExactly(person.getFirstName(), person.getLastName(), person.getAddress(), person.getCity(), person.getZip(), person.getPhone(), person.getEmail(), person.getBirthdate());
     }
 
@@ -68,17 +66,18 @@ public class PersonServiceTest {
     @Test
     public void testAddExistePerson() {
         Person person = new Person("John", "Boyd", "Toulouse", "Toulouse", "31100", "0766764585", "Boyd@gmail.com", "16/03/1995");
-        when(personRepository.getAll()).thenReturn(Arrays.asList(person));
+        when(personRepository.getAll()).thenReturn(List.of(person));
         personService.add(person);
         Mockito.verify(personRepository, times(0)).save(personArgumentCaptor.capture());
     }
+
     @Test
     public void testGetAll() {
 
         // Create some persons
         Person person1 = new Person("John", "Doe", "john.doe@example.com");
         Person person2 = new Person("Jane", "Doe", "jane.doe@example.com");
-        List<Person> allPersons = Arrays.asList(person1,person2);
+        List<Person> allPersons = Arrays.asList(person1, person2);
 
         when(personRepository.getAll()).thenReturn(allPersons);
 
@@ -89,89 +88,71 @@ public class PersonServiceTest {
         Assertions.assertTrue(result.contains(person2));
     }
 
-    //@Test
+    @Test
     public void testGetPersonByFirstNameAndLastName() {
-        // Create a mock repository with sample data
-        List<Person> persons = Arrays.asList(
-                new Person("John", "Doe", "john.doe@example.com"),
-                new Person("Jane", "Doe", "jane.doe@example.com"),
-                new Person("Bob", "Smith", "bob.smith@example.com")
-        );
-        PersonRepository personRepository = mock(PersonRepository.class);
-        when(personRepository.getAll()).thenReturn(persons);
+        Person person1 = new Person("John", "Boyd", "Toulouse", "Toulouse", "31100", "0766764585", "Boyd@gmail.com", "16/03/1995");
 
-        // Create a new instance of PersonService and set the mocked repository
-        PersonService personService = mock(PersonService.class);
+        personRepository.save(person1);
 
-        // Test getting a person that exists
-        Person person = new Person("John", "Doe", "john.doe@example.com");
-        personService.add(person);
-        personService.getPersonByFirstNameAndLastName("John", "Doe");
-        assertNotNull(person);
+        List<Person> personList = new ArrayList<>();
+        personList.add(person1);
 
-        // Test getting a person that doesn't exist
-        Person janeSmith = personService.getPersonByFirstNameAndLastName("Jane", "Smith");
-        assertNull(janeSmith);
+        when(personRepository.getAll()).thenReturn(personList);
+
+        Person result = personService.getPersonByFirstNameAndLastName("John", "Boyd");
+
+        // Verify that the correct medical record was returned
+        Assertions.assertEquals(result, person1);
+        verify(personRepository, times(1)).getAll();
+
     }
 
-    //@Test
+    @Test
     public void testDeleteByFirstNameAndLastName() {
         // Create a list of persons to use as test data
         List<Person> personList = new ArrayList<>();
         personList.add(new Person("John", "Doe"));
         personList.add(new Person("Alice", "Smith"));
 
+        when(personRepository.getAll()).thenReturn(personList);
 
-        // Create a PersonService with the mock repository
-        PersonService personService = mock(PersonService.class);
-
-        Mockito.when(personService.getAll()).thenReturn(personList);
-
-
-        // Call the deleteByFirstNameAndLastName method
-        personList = personService.deleteByFirstNameAndLastName("Alice", "Smith");
-
-        // Verify that the correct person was removed from the list
+        personService.deleteByFirstNameAndLastName("Alice", "Smith");
 
         assertFalse(personList.contains(new Person("Alice", "Smith")));
     }
 
-    //@Test
+    @Test
     public void testUpdatePerson() {
-        // Create a test person
-        PersonRepository personRepository = mock(PersonRepository.class);
-        PersonService personService = mock(PersonService.class);
-        Person person = new Person("John", "Doe");
+
+        Person person = new Person("John", "Boyd", "Toulouse", "Toulouse", "31100", "0766764585", "Boyd@gmail.com", "16/03/1995");
         personRepository.save(person);
 
         // Create an updated version of the test person
-        Person updatedPerson = new Person("Hamza", "Ben");
+        Person updatedPerson = new Person("Hamza", "Ben", "Toulouse", "Toulouse", "31100", "0766764585", "Hamza@gmail.com", "16/03/1998");
 
         // Call the updatePerson method with the updated person
         personService.updatePerson(updatedPerson);
 
         Person updatedPersons = updatedPerson;
 
-
         // Get the person from the repository and verify that it has been updated
         assertEquals(updatedPerson, updatedPersons);
 
     }
 
-    //@Test
+    @Test
     public void testGetPersonByPhone() {
         // Create a list of persons to use as test data
-        Person person1 = new Person("John", "Doe");
+        Person person1 = new Person("John", "Boyd", "Toulouse", "Toulouse", "31100", "0766764585", "Boyd@gmail.com", "16/03/1995");
         person1.setPhone("123456789");
-        Person person2 = new Person("Alice", "Smith");
+        Person person2 = new Person("Hamza", "Ben", "Toulouse", "Toulouse", "31100", "0666528541", "Boyd@gmail.com", "16/03/1995");
         person2.setPhone("987654321");
-        PersonService personService = mock(PersonService.class);
+
 
         // Create a mock PersonRepository that returns the test data
         when(personService.getPersonByphone("123456789")).thenReturn(Collections.singletonList(person1));
         when(personService.getPersonByphone("987654321")).thenReturn(Collections.singletonList(person2));
 
-        // Create a PersonService instance and call the getPersonByphone method
 
         List<Person> foundPersons1 = personService.getPersonByphone("123456789");
         List<Person> foundPersons2 = personService.getPersonByphone("987654321");
@@ -183,10 +164,10 @@ public class PersonServiceTest {
         assertEquals(person2, foundPersons2.get(0));
 
         // Verify that the personRepository's getPersonByPhone method was called
-        verify(personService, times(2)).getPersonByphone(anyString());
+        verify(personRepository, times(2)).getPersonByPhone(anyString());
     }
 
-    //@Test
+    @Test
     public void testGetAllInfo() {
         // Create test data
         Person person1 = new Person("John", "Doe", "Toulouse");
@@ -202,21 +183,8 @@ public class PersonServiceTest {
         medicalrecordRepository.save(medicalrecord1);
         personRepository.save(person2);
         medicalrecordRepository.save(medicalrecord2);
-
-
-        // Call the method being tested
-       /* Map<Person, Medicalrecord> result = ("John", "Doe");
-
-        // Verify the results
-        assertEquals(1, result.size());
-        assertTrue(result.containsKey(person1));
-        assertTrue(result.containsValue(medicalrecord1));*/
     }
 
-    /*List<Person> personList = personRepository.getPersonByName(lastName);
-        for (Person person : personList) {
-        List<Allergy> allergieList = allergyRepository.findByFirstNameAndLastName(person.getFirstName(), person.getLastName());
-        List<Medicalrecord> medicalrecordList = medicalrecordRepository.getMedicalrecorByFirstNameAndLastName(person.getFirstName(), person.getLastName());*/
     @Test
     public void testGetPersonInfos() {
         // Create test data
@@ -241,11 +209,11 @@ public class PersonServiceTest {
         List<String> actualFirstNames = result.stream().map(personInfoDto -> personInfoDto.getPersonDataDto().getFirstName()).collect(toList());
         List<String> actualLastNames = result.stream().map(personInfoDto -> personInfoDto.getPersonDataDto().getLastName()).collect(toList());
 
-        MatcherAssert.assertThat(actualFirstNames , containsInAnyOrder(person1.getFirstName(), person2.getFirstName()));
-        MatcherAssert.assertThat(actualLastNames , containsInAnyOrder(person1.getLastName(), person2.getLastName()));
+        MatcherAssert.assertThat(actualFirstNames, containsInAnyOrder(person1.getFirstName(), person2.getFirstName()));
+        MatcherAssert.assertThat(actualLastNames, containsInAnyOrder(person1.getLastName(), person2.getLastName()));
     }
 
-    //@Test
+    @Test
     public void testGetPhonesByFirestation() {
 
         PhoneAlertDto phoneAlertDto = new PhoneAlertDto();
@@ -254,110 +222,105 @@ public class PersonServiceTest {
         Person person1 = new Person("John", "Boyd", "Toulouse", "Toulouse", "31100", "0766764585", "Boyd@gmail.com", "16/03/1995");
         Person person2 = new Person("Hamza", "Ben", "Toulouse", "Toulouse", "31100", "0766785522", "Hamza@gmail.com", "16/03/1999");
 
-
         Firestation firestation1 = new Firestation("Toulouse", "1");
-        Firestation firestation2 = new Firestation("Paris", "1");
-        Firestation firestation3 = new Firestation("789 Maple St", "2");
+        Firestation firestation2 = new Firestation("Paris", "2");
 
-        PersonRepository personRepository = mock(PersonRepository.class);
-        FirestationRepository firestationRepository = mock(FirestationRepository.class);
-        PersonService personService = mock(PersonService.class);
 
-        // Add test data to repositories
-        personRepository.save(person1);
-        personRepository.save(person2);
+        PhoneAlertDto result = personService.getPhonesByFirestation("2");
 
-        firestationRepository.save(firestation1);
-        firestationRepository.save(firestation2);
-        firestationRepository.save(firestation3);
-
-        PhoneAlertDataDto phoneAlertDataDto = new PhoneAlertDataDto();
-        phoneAlertDataDto.setPhone(person1.getPhone());
-
-        List<PhoneAlertDataDto> phoneAlertDataDtos = new ArrayList<>();
-        phoneAlertDataDtos.add(phoneAlertDataDto);
-
-        phoneAlertDto.setPhoneAlertDataDtos(phoneAlertDataDtos);
-
-        Assertions.assertNotNull(phoneAlertDto);
-
+        Assertions.assertNotNull(result);
     }
 
-    //@Test
+
+    @Test
     public void testGetResidentsByAddress() {
         // Create test data
-        Firestation firestation1 = new Firestation("Toulouse", "1");
-        Person person1 = new Person("John", "Boyd", "Toulouse", "Toulouse", "31100", "0766764585", "Boyd@gmail.com", "16/03/1995");
-        Allergy allergy1 = new Allergy("John", "Boyd", "peanut");
-        Medicalrecord medicalrecord1 = new Medicalrecord("John", "Boyd", "Doliprane","16/03/1995");
+        Firestation firestation = new Firestation("Toulouse", "1");
+        when(firestationRepository.getAll()).thenReturn(List.of(firestation));
+        Person person = new Person("John", "Boyd", "Toulouse", "Toulouse", "31100", "0766764585", "Boyd@gmail.com", "16/03/1995");
+        Allergy allergy = new Allergy(person.getFirstName(), person.getLastName(), "peanut");
+        Medicalrecord medicalrecord = new Medicalrecord(person.getFirstName(), person.getLastName(), "Doliprane", "16/03/1995");
 
-        FireDataDto fireDataDto = mock(FireDataDto.class);
-        FireDto fireDto = mock(FireDto.class);
-        FirestationService firestationService = mock(FirestationService.class);
-        PersonService personService = mock(PersonService.class);
-        MedicalrecordService medicalrecordService = mock(MedicalrecordService.class);
-        AllergyService allergyService = mock(AllergyService.class);
+        when(personRepository.getPersonByAddress("Toulouse")).thenReturn(List.of(person));
+        when(allergyRepository.findByFirstNameAndLastName(person.getFirstName(), person.getLastName())).thenReturn(List.of(allergy));
+        when(medicalrecordRepository.getMedicalrecorByFirstNameAndLastName(person.getFirstName(), person.getLastName())).thenReturn(List.of(medicalrecord));
 
-        // Add test data to repositories
-        firestationService.add(firestation1);
-        personService.add(person1);
-        allergyService.add(allergy1);
-        medicalrecordService.add(medicalrecord1);
-
-        // Call the method being tested
         List<FireDto> result = personService.getResidentsByAddress("Toulouse");
 
-        // Verify the result
         Assertions.assertEquals(1, result.size());
+        Assert.assertEquals(person.getFirstName(), result.get(0).getFireDataDto().getFirstName());
+        Assert.assertEquals(person.getPhone(), result.get(0).getFireDataDto().getPhone());
+
     }
 
-    //@Test
+
+    @Test
     public void testGetResidentsByStationNumber() {
-        // Create mock repositories
-        FirestationRepository firestationRepository = Mockito.mock(FirestationRepository.class);
-        PersonRepository personRepository = Mockito.mock(PersonRepository.class);
-        AllergyRepository allergyRepository = Mockito.mock(AllergyRepository.class);
-        MedicalrecordRepository medicalrecordRepository = Mockito.mock(MedicalrecordRepository.class);
-        PersonService personService = mock(PersonService.class);
 
-        // Set up mock data
-        List<Firestation> firestations = new ArrayList<>();
-        firestations.add(new Firestation("Toulouse", "1"));
-        firestations.add(new Firestation("Paris", "2"));
-        Mockito.when(firestationRepository.getFirestationByStation("1")).thenReturn(firestations.subList(0, 1));
-        Mockito.when(firestationRepository.getFirestationByStation("2")).thenReturn(firestations.subList(1, 2));
+        Firestation firestation1 = new Firestation("Toulouse", "1");
+        Mockito.when(firestationRepository.getFirestationByStation("1")).thenReturn(List.of(firestation1));
 
-        List<Person> persons = new ArrayList<>();
-        persons.add( new Person("John", "Boyd", "Toulouse", "Toulouse", "31100", "0766764585", "Boyd@gmail.com", "16/03/1995"));
-        persons.add(new Person("Jane", "Doe", "Paris", "Paris","75000","0766452210","jane.doe@example.com", "02/02/2001"));
+        Person person = new Person("John", "Boyd", "Toulouse", "Toulouse", "31100", "0766764585", "Boyd@gmail.com", "16/03/1995");
+        Mockito.when(personRepository.getAll()).thenReturn(List.of(person));
 
-        Mockito.when(personRepository.getAll()).thenReturn(persons);
+        Allergy allergy = new Allergy(person.getFirstName(), person.getLastName(), "peanuts");
+        Mockito.when(allergyRepository.findByFirstNameAndLastName(person.getFirstName(), person.getLastName())).thenReturn(List.of(allergy));
+        Medicalrecord medicalrecord = new Medicalrecord(person.getFirstName(), person.getLastName(), "Doliprane : 200mg", "16/03/1995");
+        Mockito.when(medicalrecordRepository.getMedicalrecorByFirstNameAndLastName(person.getFirstName(), person.getLastName())).thenReturn(List.of(medicalrecord));
 
-        List<Allergy> allergies1 = new ArrayList<>();
-        allergies1.add(new Allergy("peanuts"));
-        List<Allergy> allergies2 = new ArrayList<>();
-        allergies2.add(new Allergy("shellfish"));
-        Mockito.when(allergyRepository.findByFirstNameAndLastName("John", "Doe")).thenReturn(allergies1);
-        Mockito.when(allergyRepository.findByFirstNameAndLastName("Jane", "Doe")).thenReturn(allergies2);
-
-        List<Medicalrecord> medicalrecords1 = new ArrayList<>();
-        medicalrecords1.add(new Medicalrecord("John","Boyd", "Doliprane : 200mg", "16/03/1995"));
-        List<Medicalrecord> medicalrecords2 = new ArrayList<>();
-        medicalrecords2.add(new Medicalrecord("Jane","Doe", "Doliprane : 200mg", "02/02/1195"));
-        Mockito.when(medicalrecordRepository.getMedicalrecorByFirstNameAndLastName("John", "Doe")).thenReturn(medicalrecords1);
-        Mockito.when(medicalrecordRepository.getMedicalrecorByFirstNameAndLastName("Jane", "Doe")).thenReturn(medicalrecords2);
 
         // Call the method being tested
         Map<String, List<FloodDto>> result = personService.getResidentsByStationNumber(Arrays.asList("1", "2"));
 
         // Verify the result
-        Assert.assertEquals(2, result.size());
+        Assert.assertEquals(1, result.size());
 
-        List<FloodDto> floodDataDtos1 = result.get("123 Main St");
-        Assert.assertEquals(2, floodDataDtos1.size());
-        Assert.assertEquals("John", floodDataDtos1.get(0).getFloodDataDto().getFirstName());
-        Assert.assertEquals("Doe", floodDataDtos1.get(0).getFloodDataDto().getLastName());
+        List<FloodDto> floodDataDtos1 = result.get("Toulouse");
+        Assert.assertEquals(person.getFirstName(), floodDataDtos1.get(0).getFloodDataDto().getFirstName());
+        Assert.assertEquals(person.getPhone(), floodDataDtos1.get(0).getFloodDataDto().getPhone());
 
     }
+
+    @Test
+    public void testGetChildrenByAddress() {
+
+        Person personJohn = new Person("John", "Boyd", "Toulouse", "Toulouse", "31100", "0766764585", "Boyd@gmail.com", "16/03/2010");
+        Person personHamza = new Person("Hamza", "Benalia", "Toulouse", "Toulouse", "31100", "0766764585", "Hamza@gmail.com", "16/03/2000");
+        Mockito.when(personRepository.getPersonByAddress(anyString())).thenReturn(Arrays.asList(personJohn, personHamza));
+
+        // Call the method being tested
+        ChildDto result = personService.getChildrenByAddress("Toulouse");
+
+        // Verify the result
+        Assert.assertEquals(1, result.getChildren().size());
+        Assert.assertEquals(1, result.getAdults().size());
+
+        Assert.assertEquals(personJohn.getFirstName(), result.getChildren().get(0).getFirstName());
+        Assert.assertEquals(personJohn.getLastName(), result.getChildren().get(0).getLastName());
+        Assert.assertEquals(personHamza.getFirstName(), result.getAdults().get(0).getFirstName());
+        Assert.assertEquals(personHamza.getLastName(), result.getAdults().get(0).getLastName());
+    }
+
+    @Test
+    public void getPersonByFirestationTest(){
+
+        Firestation firestation1 = new Firestation("Toulouse", "1");
+
+        Person person = new Person("John", "Boyd", "Toulouse", "Toulouse", "31100", "0766764585", "Boyd@gmail.com", "16/03/1995");
+        Mockito.when(personRepository.getAll()).thenReturn(List.of(person));
+
+        when(firestationRepository.getAdresseByStation("1")).thenReturn(Collections.singletonList(person.getAddress()));
+
+        // Call the method being tested
+        StationInfoDto result = personService.getPersonByFirestation(("1"));
+
+        // Verify the result
+
+        Assert.assertEquals(person.getFirstName(), result.getPersonStationDtos().get(0).getFirstName());
+
+    }
+
 }
+
+
 
